@@ -34,6 +34,8 @@ import org.camunda.bpm.engine.impl.interceptor.Command;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
 import org.camunda.bpm.engine.impl.interceptor.CommandExecutor;
 import org.camunda.bpm.engine.impl.util.ReflectUtil;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -44,12 +46,24 @@ public class DatabaseTableSchemaTest {
   private static final String SCHEMA_NAME = "SCHEMA1";
   private static final String PREFIX_NAME = "PREFIX1_";
 
+  private PooledDataSource pooledDataSource;
+
+  @Before
+  public void setUp() {
+    pooledDataSource = new PooledDataSource(ReflectUtil.getClassLoader(), "org.h2.Driver",
+        "jdbc:h2:mem:DatabaseTablePrefixTest;DB_CLOSE_DELAY=1000", "sa", "");
+  }
+
+  @After
+  public void tearDown() throws SQLException {
+
+    Connection connection = pooledDataSource.getConnection();
+    connection.createStatement().execute("SHUTDOWN");
+    connection.close();
+  }
+
   @Test
   public void testPerformDatabaseSchemaOperationCreateTwice() throws Exception {
-
-    // both process engines will be using this datasource.
-    PooledDataSource pooledDataSource = new PooledDataSource(ReflectUtil.getClassLoader(), "org.h2.Driver",
-        "jdbc:h2:mem:DatabaseTablePrefixTest;DB_CLOSE_DELAY=1000", "sa", "");
 
     Connection connection = pooledDataSource.getConnection();
     connection.createStatement().execute("drop schema if exists " + SCHEMA_NAME);
@@ -80,8 +94,6 @@ public class DatabaseTableSchemaTest {
 
   @Test
   public void testTablePresentWithSchemaAndPrefix() throws SQLException {
-    PooledDataSource pooledDataSource = new PooledDataSource(ReflectUtil.getClassLoader(), "org.h2.Driver",
-        "jdbc:h2:mem:DatabaseTablePrefixTest;DB_CLOSE_DELAY=1000", "sa", "");
 
     Connection connection = pooledDataSource.getConnection();
     connection.createStatement().execute("drop schema if exists " + SCHEMA_NAME);
