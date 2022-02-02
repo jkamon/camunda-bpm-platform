@@ -476,7 +476,7 @@ public class HtmlFormEngine implements FormEngine {
     for (FormFieldValidationConstraint constraint : formField.getValidationConstraints()) {
       String constraintName = constraint.getName();
       String configuration = (String) constraint.getConfiguration();
-      formControl.attribute(constraintName, configuration);
+      formControl.attribute("readonly".equals(constraintName) ? "disabled" : constraintName, configuration);
     }
   }
 
